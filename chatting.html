@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatting</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <h2>Chat with your friends (Ahmad)</h2>
+        <div class="row">
+            <div class="col-3">
+                <div class="container" style="border: 1px solid black; height: 80vh; ">
+                    <h2>Mujtaba</h2>
+                </div>
+            </div>
+            <div class="col-9">
+                <div class="container" style="border: 1px solid black; height: 80vh;">
+                    <div class="container" style="border: 1px solid black; height: 70vh;">
+                    <p style="right: 0; text-align: right;">hi, my name is ahmad</p>
+                    <p>hi, my name is ahmad</p>
+                    </div>
+                    <form id="myForm" action="/New/Chat" method="post">  
+                    <input type="text" name="task" class="form-control mt-2" id="inputField" placeholder="Chat">
+                </form>
+                </div>
+            </div>
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script>
+                $('#inputField').keypress(function(event) {
+      // Check if the pressed key is Enter (key code 13)
+                if (event.which === 13) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+        // Manually submit the form
+        $('#myForm').submit();
+                }
+    });
+                </script>
+        </div>
+    </div>
+</body>
+</html>

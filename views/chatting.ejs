@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatting</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <h2>Chat with your friends (<%= user.user %>)</h2>
+        <div class="row mt-2">
+            <div id="display1" class=" col-12 col-md-3">
+                <div class="container pt-2" style="overflow: scroll; overflow-x: hidden;  border: 1px solid black; height: 80vh; ">
+                    
+                    <% for(var i=0; i< allusers.length; i++){%>
+                    <% if(allusers[i].Uname !== user.user){ %> 
+                            <button class="fs-4 mb-2 click" style="width: 100%; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: none; text-transform: capitalize;" onclick="getButtonValue(this)" data-id="<%= allusers[i].id %>">
+                                <%= allusers[i].Uname %>
+                            </button>
+                    <% } } %>
+                </div>
+            </div>
+    <style>
+@media screen and (max-width:767px) {
+    #display2{
+        display: none;
+    }
+}
+::-webkit-scrollbar {
+    width: 5px; /* Adjust the width as needed */
+  }
+::-webkit-scrollbar-thumb {
+    background-color: #a0a0a0; /* Color of the thumb */
+}
+input[type="file"] {
+      display: none;
+    }
+    #fullscreen-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1;
+  overflow: hidden;
+}
+
+#fullscreen-image {
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  display: block;
+}
+    </style>
+            <div id="display2" class="col-9">
+                <img style="display: none; margin-bottom: 9px;" id="arrow" onclick="arrow()" src="/back.png" width="30px">
+                <div class="container" style="border: 1px solid black; height: 80vh;">
+                    <div class="container text_box" id="parentDiv" style=" height: 70vh; overflow: scroll; overflow-x: hidden; ">
+                    
+                    <!-- <p style="right: 0; text-align: right;">hi, sended name is ahmad</p> -->
+                    <!-- <p>hi, my name is mujtaba</p> -->
+                    
+                </div>
+                
+                <div class="d-flex">
+                    <input type="text" name="Receiving_id" id="idfield" hidden>
+                    <input type="text" name="sending_id" id="idfield2" value="<%= user.id %>" hidden>
+                    <input id="file-upload"  type="file" style="background:none; border: none;" onchange="fileupload()">
+                    <label for="file-upload" class="custom-file-upload">
+                        <img class="mt-2 me-2" src="/file.png" width="30px">
+                    </label>
+                    <input type="text" name="message" class="form-control mt-2"  id="inputField" placeholder="Chat">
+                    <button class="btn btn-success px-5 mt-2 ms-2" onclick="submitForm()">Send</button>
+                </div>
+            </div>
+            </div>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+function openFullScreen(img) {
+  const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+  const fullscreenImage = document.getElementById('fullscreen-image');
+
+  fullscreenImage.src = img.src;
+  fullscreenOverlay.style.display = 'flex';
+}
+
+
+function closeFullScreen() {
+  const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+  fullscreenOverlay.style.display = 'none';
+}
+
+
+
+function removeBlur(img) {
+    img.style.filter = 'none';
+    const imageSource = img.src;
+
+    // Use the URL object to extract the file name
+    const url = new URL(imageSource);
+    const fileName = url.pathname.split('/').pop();
+
+    // Log or use the file name as needed
+    console.log('File Name:', fileName);
+    
+    const Receiving_id = document.getElementById('idfield').value
+    const sending_id = document.getElementById('idfield2').value
+    
+    fetch('/unblur', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `param1=${Receiving_id}&param2=${sending_id}&param3=${fileName}`,
+            })
+            .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+}
+    function fileupload(){
+        const Receiving_id = document.getElementById('idfield').value
+        const sending_id = document.getElementById('idfield2').value
+        const fileInput = document.getElementById('file-upload');
+      const file = fileInput.files[0];
+
+      if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('param1', Receiving_id);
+        formData.append('param2', sending_id);
+
+        fetch('/upload', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      } else {
+        console.error('No file selected.');
+      }
+    }
+
+    function scrollToBottom() {
+      var scrollContainer = document.getElementById('parentDiv');
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+
+let selectedButton = null;
+function arrow(){
+    var displayValue = window.getComputedStyle(document.getElementById("display2")).display;
+    document.getElementById("display2").style.display = "none";
+    document.getElementById("display2").setAttribute("class","col-9")
+    document.getElementById("display1").style.display = "block"
+}
+function getButtonValue(button) {
+    const buttonValue = button.getAttribute('data-id');
+    console.log(`Button value: ${buttonValue}`);
+
+    // Reset the style of the previously clicked button
+    if (selectedButton) {
+        selectedButton.style.border = "1px solid black";
+    }
+    console.log()
+    var displayValue = window.getComputedStyle(document.getElementById("display2")).display;
+
+if (displayValue === "none") {
+  console.log("yes");
+  document.getElementById("display2").style.display = "block";
+  document.getElementById("display2").setAttribute("class","col-12")
+  document.getElementById("display1").style.display = "none"
+  document.getElementById("arrow").style.display = "block";
+}
+// Set the value for the hidden input field
+    document.getElementById('idfield').value = buttonValue;
+    // Set the style of the current button
+    button.style.border = "5px solid black";
+    // Update the selected button
+    selectedButton = button;
+
+    sendPostRequest()
+    
+}
+function submitForm() {
+            // Manually trigger the form submission
+            const Receiving_id = document.getElementById('idfield').value
+            const sending_id = document.getElementById('idfield2').value
+            const message = document.getElementById('inputField').value
+            document.getElementById('inputField').value = ""
+            fetch('/New/Chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `param1=${Receiving_id}&param2=${sending_id}&param3=${message}`,
+            })
+            .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+
+        }
+
+        // Listen for the "keydown" event on the input field
+        document.getElementById('inputField').addEventListener('keydown', function (event) {
+            // Check if the pressed key is Enter (keyCode 13)
+            if (event.keyCode === 13) {
+                // Prevent the default behavior (e.g., line break in textarea)
+                event.preventDefault();
+
+                // Trigger the form submission
+                submitForm();
+            }
+        });
+
+        function sendPostRequest() {
+            const Receiving_id = document.getElementById('idfield').value
+            const sending_id = document.getElementById('idfield2').value
+            fetch('/Check/New/Chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `param1=${Receiving_id}&param2=${sending_id}`,
+            })
+            .then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(data => {
+    // Handle the response data
+    console.log("from front end",data.messages);
+    
+    const parentDiv = document.getElementById('parentDiv');
+    // Assuming you have a parent div with id "parentDiv"
+    parentDiv.innerHTML = '';
+    
+    const sortedArray = data.messages.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+
+    console.log(sortedArray); 
+    for(let i = 0 ; i < sortedArray.length; i++) {
+        const newParagraph = document.createElement('div');
+        newParagraph.textContent = sortedArray[i].msg;
+        if(sortedArray[i].sentby == sending_id){
+            newParagraph.setAttribute("style","color:white; right:0; text-align: right; background-color:rgb(13, 89, 13); padding:10px; margin:5px; border-radius:5px")
+        }
+        else{
+            newParagraph.setAttribute("style","color:Black; background-color:rgb(235, 231, 223); padding:10px; margin:5px; border-radius:5px")
+        }
+        if(sortedArray[i].file){
+            const msg = sortedArray[i].msg
+            const dotPosition = msg.lastIndexOf('.');
+            
+            // Use slice to extract the substring starting from the last dot position
+            // This will give you the file extension, including the dot (e.g., '.txt')
+            const fileExtension = msg.slice(dotPosition);
+            
+            console.log('File Extension:', fileExtension);
+            if(fileExtension == ".png" ||fileExtension ==  ".jpg"||fileExtension == ".jpeg"||fileExtension == ".WebP") {
+                const img = document.createElement('img');
+                const a = document.createElement('a');
+                const button = document.createElement('button');
+                const div = document.createElement('div');
+                const div2 = document.createElement('div');
+                const img2 = document.createElement('img');
+                img2.setAttribute("id","fullscreen-image")
+                
+
+                div2.setAttribute('id', 'fullscreen-overlay')
+                div2.setAttribute("onclick","closeFullScreen()")
+                
+                a.setAttribute('href',`/download/${sortedArray[i].msg}`);
+                a.setAttribute('target',"_blank");
+                
+                
+                img.setAttribute("src",msg)
+                img2.setAttribute("src",msg)
+                
+                if(sortedArray[i].sentby == sending_id){
+                    div.setAttribute("style","min-width:100%")
+                    img.setAttribute("style","max-width:300px; float:right; padding:10px; margin:5px;")
+
+                }else{
+                    div.setAttribute("style","min-width:100%")
+                    if(sortedArray[i].file == "1"){
+                        img.setAttribute("style","max-width:300px; filter: blur(5px); padding:10px; margin:5px;")
+                    img.setAttribute("onclick","removeBlur(this)")
+                    a.appendChild(img)
+                    div.appendChild(a)
+                    }
+                    else{
+                        div2.appendChild(img2)
+                        img.setAttribute("onclick","openFullScreen(this)")
+                        div.appendChild(img)
+                        parentDiv.appendChild(div2);
+                        img.setAttribute("style","max-width:300px; padding:10px; margin:5px;")
+                    }
+                    
+                }
+                
+                parentDiv.appendChild(div);
+            }else{
+            console.log("oh yeah")
+            const a = document.createElement('a');
+            a.setAttribute('href',`/download/${sortedArray[i].msg}`);
+            a.setAttribute('target',"_blank");
+            a.appendChild(newParagraph)
+            parentDiv.appendChild(a)
+            }
+        }
+        else{
+            parentDiv.appendChild(newParagraph)
+        }
+    }
+    scrollToBottom()
+})
+.catch(error => {
+    // Handle any errors that occurred during the fetch
+    console.error('Error:', error);
+});
+        }
+        // Set up an interval to execute the function every 5 seconds
+        setInterval(sendPostRequest, 2000);
+        
+</script>
+    
+    </div>
+    </div>
+</body>
+</html>
